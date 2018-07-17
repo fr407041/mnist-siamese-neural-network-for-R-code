@@ -3,7 +3,7 @@
 I have been waiting a long time for R keras to finish example code : [mnist_siamese_graph.R](https://github.com/rstudio/keras/blob/master/vignettes/examples/mnist_siamese_graph.R).
 But it seems that there isn't any movement, so I decide to completed this job by myself.
 
-In this kernel, I hope you learn several things :
+In this kernel, I hope you learn 4 things :
 1. Use R keras to build self define generator (There are few related materials on the web, so I hope I can help somebody like what I was ).
 2. Use R keras to build self define layer (As above).
 3. Use R keras to build self define backend function (As above).
@@ -378,3 +378,71 @@ history <- model %>% fit_generator(
   validation_steps = 50
 )
 ```
+**Step 6: Model Fit**
+<br>Notice! Small learning rate (ex : 1e-5) will lead to slowly optimize progress, so we suggest use 1e-3 as our learning rate.
+<br>Below is comparison, you will find 1e-3 is learning faster than 1e-5 more.
+![learning_rate_comparison](https://github.com/fr407041/mnist-siamese-neural-network-for-R-code/blob/master/images/learning_Rate_comparison.png)
+```
+model %>% compile(
+  loss      = "binary_crossentropy",
+  optimizer = optimizer_rmsprop(lr = 1e-3),
+  metrics   = c("accuracy")
+)
+
+history <- model %>% fit_generator(
+  train_join_generator,
+  steps_per_epoch = 100,
+  epochs = 50,
+  validation_data = val_join_generator,
+  validation_steps = 50
+)
+
+plot(history)
+```
+**Step 7: Test Data Verified**
+<br> Same number match
+```
+# same number
+mnist_number_left  <- 8
+filter_idx_left    <- sample( which( test_labels == mnist_number_left  ) , 1 )
+img_input_left     <- test_images[filter_idx_left ,,]/255
+mnist_number_right <- 8
+filter_idx_right   <- sample( which( test_labels == mnist_number_right ) , 1 )
+img_input_right    <- test_images[filter_idx_right,,]/255
+img_input_left     <- array_reshape(img_input_left , c(1, shape_size, shape_size, 1))
+img_input_right    <- array_reshape(img_input_right, c(1, shape_size, shape_size, 1))
+
+similarity         <- model %>% predict(list(img_input_left,img_input_right))
+par(mar = c(0,0,4,0))
+plot( as.raster( abind(img_input_left[1,,,] ,
+                       img_input_right[1,,,],
+                       along = 2
+                      ) 
+               ) 
+)
+title( paste0( test_labels[filter_idx_left] , " v.s " , test_labels[filter_idx_right] , " , similarity : " , round(similarity,3) ) )
+```
+![learning_rate_comparison](https://github.com/fr407041/mnist-siamese-neural-network-for-R-code/blob/master/images/same_comparison.png)
+Different number match
+```
+# different number
+mnist_number_left  <- 8
+filter_idx_left    <- sample( which( test_labels == mnist_number_left  ) , 1 )
+img_input_left     <- test_images[filter_idx_left ,,]/255
+mnist_number_right <- 7
+filter_idx_right   <- sample( which( test_labels == mnist_number_right ) , 1 )
+img_input_right    <- test_images[filter_idx_right,,]/255
+img_input_left     <- array_reshape(img_input_left , c(1, shape_size, shape_size, 1))
+img_input_right    <- array_reshape(img_input_right, c(1, shape_size, shape_size, 1))
+
+similarity         <- model %>% predict(list(img_input_left,img_input_right))
+par(mar = c(0,0,4,0))
+plot( as.raster( abind(img_input_left[1,,,] ,
+                       img_input_right[1,,,],
+                       along = 2
+                      ) 
+               ) 
+    )
+title( paste0( test_labels[filter_idx_left] , " v.s " , test_labels[filter_idx_right] , " , similarity : " , round(similarity,3) ) )
+```
+![learning_rate_comparison](https://github.com/fr407041/mnist-siamese-neural-network-for-R-code/blob/master/images/different_comparison.png)
