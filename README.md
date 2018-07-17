@@ -3,7 +3,7 @@
 I have been waiting a long time for R keras to finish example code : [mnist_siamese_graph.R](https://github.com/rstudio/keras/blob/master/vignettes/examples/mnist_siamese_graph.R).
 But it seems that there isn't any movement, so I decide to completed this job by myself.
 
-In this kernel, I hope you will learn 4 things :
+In this intoduction, I hope you will learn 4 things :
 1. Use R keras to build self define generator (There are few related materials on the web, so I hope I can help somebody like what I was ).
 2. Use R keras to build self define layer (As above).
 3. Use R keras to build self define backend function (As above).
@@ -36,13 +36,15 @@ i <- 1
 plot( as.raster(train_images[i,,]/255) )
 title( train_labels[i] )
 ```
+![number](https://github.com/fr407041/mnist-siamese-neural-network-for-R-code/blob/master/images/plot_number.png)
+
 **Step 2: Parameter Setting**
+```
 num_classes  <- 10 # only number : 0,1,2,3,4,5,6,7,8,9 
 shape_size   <- 28 # mnist shape ( ,28,28)
 train_batch  <- 20 
 val_batch    <- 20 
-test_batch   <- 1
-
+```
 **Step 3: Data Preprocess**
 <br>Build train_data_list and val_data_list for generator.
 ```
@@ -423,6 +425,7 @@ plot( as.raster( abind(img_input_left[1,,,] ,
 title( paste0( test_labels[filter_idx_left] , " v.s " , test_labels[filter_idx_right] , " , similarity : " , round(similarity,3) ) )
 ```
 ![learning_rate_comparison](https://github.com/fr407041/mnist-siamese-neural-network-for-R-code/blob/master/images/same_comparison.png)
+
 Different number match
 ```
 # different number
