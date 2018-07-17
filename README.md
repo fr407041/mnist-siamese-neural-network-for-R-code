@@ -2,6 +2,7 @@
 
 I have been waiting a long time for R keras to finish example code : [mnist_siamese_graph.R](https://github.com/rstudio/keras/blob/master/vignettes/examples/mnist_siamese_graph.R).
 But it seems that there isn't any movement, so I decide to completed this job by myself.
+<br>[Here](https://www.kaggle.com/shih0430/mnist-siamese-neural-network-for-r-code) is my Kaggle kernel introduction.
 
 In this intoduction, I hope you will learn 4 things :
 1. Use R keras to build self define generator (There are few related materials on the web, so I hope I can help somebody like what I was ).
