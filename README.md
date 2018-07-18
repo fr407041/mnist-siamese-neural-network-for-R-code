@@ -1,4 +1,4 @@
-# mnist siames neural network for R code
+# mnist siamese neural network for Keras R code
 
 I have been waiting a long time for R keras to finish example code : [mnist_siamese_graph.R](https://github.com/rstudio/keras/blob/master/vignettes/examples/mnist_siamese_graph.R).
 But it seems that there isn't any movement, so I decide to completed this job by myself.
