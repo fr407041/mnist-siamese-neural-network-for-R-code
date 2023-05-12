@@ -1,19 +1,18 @@
-# mnist siamese neural network for Keras R code
+# MNIST Siamese Neural Network for Keras in R
 
-I have been waiting a long time for R keras to finish example code : [mnist_siamese_graph.R](https://github.com/rstudio/keras/blob/master/vignettes/examples/mnist_siamese_graph.R).
-But it seems that there isn't any movement, so I decide to completed this job by myself.
-<br>[Here](https://www.kaggle.com/shih0430/mnist-siamese-neural-network-for-r-code) is my Kaggle kernel introduction.
+I have been eagerly waiting for R Keras to release an example code for the mnist_siamese_graph.R model, but it seems that there has been no progress. Hence, I decided to take the initiative and complete this job myself.
 
-In this intoduction, I hope you will learn 4 things :
-1. Use R keras to build self define generator (There are few related materials on the web, so I hope I can help somebody like what I was ).
-2. Use R keras to build self define layer (As above).
-3. Use R keras to build self define backend function (As above).
-4. Realize a little knowledge about siamese neural network.
+You can check out my Kaggle kernel introduction [here](https://github.com/rstudio/keras/blob/master/vignettes/examples/mnist_siamese_graph.R), where I hope you will learn the following four things:
+
+1. Building a self-defined generator using R Keras, which has few related materials available online.
+1. Building a self-defined layer using R Keras (as above).
+1. Building a self-defined backend function using R Keras (as above).
+1. Gaining some knowledge about the Siamese neural network.
 
 Now we start to build siamese neural network for mnist number's similarity.
 
-**Step 1 : Data Load**
-<br>Read Data and Split into train、validate and test
+**Step 1 : Load the Data**
+<br>First, we need to load and split the data into training, validation, and testing sets. We'll use the Keras and abind libraries in R to do this. Here's the code:
 ```
 library(keras)
 library(abind)
@@ -29,8 +28,11 @@ train_labels <- train_labels[-val_idx]
 test_images  <- mnist$test$x 
 test_labels  <- mnist$test$y  
 ```
-You can visualize the mnist's data as blow. The title is its label and image is its array.
-<br>Because I have divide 255, so the maximum of sample's array is 1(white) and the minimum of sample's array is 0(black).
+
+You can see what the MNIST data looks like below. The label corresponds to the number in the image. Note that the array for each sample has been divided by 255, so the maximum value is 1 (white) and the minimum value is 0 (black).
+
+Even if you're not a technical reader, don't worry! This guide will provide an accessible introduction to building a siamese neural network.
+
 ```
 par(mar = c(0,0,4,0))
 i <- 1
@@ -39,15 +41,15 @@ title( train_labels[i] )
 ```
 ![number](https://github.com/fr407041/mnist-siamese-neural-network-for-R-code/blob/master/images/plot_number.png)
 
-**Step 2: Parameter Setting**
+**Step 2: Setting Parameters**
 ```
-num_classes  <- 10 # only number : 0,1,2,3,4,5,6,7,8,9 
-shape_size   <- 28 # mnist shape ( ,28,28)
+num_classes  <- 10 # mnist dataset only contains numbers: 0,1,2,3,4,5,6,7,8,9 
+shape_size   <- 28 # mnist images have a shape of (28,28)
 train_batch  <- 20 
 val_batch    <- 20 
 ```
-**Step 3: Data Preprocess**
-<br>Build train_data_list and val_data_list for generator.
+**Step 3: Data Preprocessing**
+<br>We create two lists: **`train_data_list`** and **`val_data_list`** to hold the training and validation data. We also group the data by their labels and create sublists of images and labels.
 ```
 train_data_list    <- list() 
 grp_kind     <- sort( unique( train_labels ) )   
@@ -71,11 +73,12 @@ grp_kind     <- sort( unique( val_labels ) )
                                       )   
   }
 ```
-  **Step 4: Build self define generator**
-<br>Intially, we build generators for each mnist's number. By this way, we can enjoy data augmentation from image_data_generator to generalize our data number.
-<br>Next, we build a list object to collect all numbers' generators for self define generator to use.
-<br> (Note : All generator's batch size is 1, it will help build self define generator)
-<br>Finally,  we build self define generator **join_generator** which utilize above list as parametrs to build balance data sets of same number and different number.
+  **Step 4: Building Self-Defined Generator**
+
+<br> We create a separate generator for each number in the dataset, allowing us to utilize the data augmentation provided by the image_data_generator to generalize our data. Next, we create a list to collect all the generators for each number, and use this list as input to our self-defined generator, called join_generator. This generator uses the list of generators as a parameter to build balanced datasets of images with the same number and different numbers. 
+ 
+(Note: Each generator has a batch size of 1, which will allow us to build a self-defined generator.)
+
 ```
 train_datagen = image_data_generator(
   rescale = 1/255          ,
@@ -328,8 +331,8 @@ join_generator <- function( generator_list , batch ) {
 train_join_generator   <- join_generator( train_generator_list , train_batch )
 val_join_generator     <- join_generator( val_generator_list   , val_batch   )
 ```
-**Step 5: Build siamese model**
-<br>We build simple convolution as conv_base and let two images use the same conv_base model which share the same weight (as below) .
+**Step 5: Building the Siamese model**
+<br>Now we can build our siamese neural network for recognizing similarity between two MNIST numbers. We first create a simple convolutional neural network model conv_base, which will be shared by two input images with the same weights.
 ![siamese](https://github.com/fr407041/mnist-siamese-neural-network-for-R-code/blob/master/images/saimese_model.jpg)
 ```
 left_input_tensor      <- layer_input(shape = list(shape_size, shape_size, 1), name = "left_input_tensor")
@@ -381,9 +384,9 @@ history <- model %>% fit_generator(
   validation_steps = 50
 )
 ```
-**Step 6: Model Fit**
-<br>Notice! Small learning rate (ex : 1e-5) will lead to slowly optimize progress, so we suggest use 1e-3 as our learning rate.
-<br>Below is comparison, you will find 1e-3 is learning faster than 1e-5 more.
+**Step 6: Train the Model**
+<br>Note: Using a small learning rate (e.g. 1e-5) can result in slower optimization progress. Therefore, we recommend using a learning rate of 1e-3 to speed up the training process.
+<br>As shown below, the model trained with a learning rate of 1e-3 learns faster than the one trained with a learning rate of 1e-5.
 ![learning_rate_comparison](https://github.com/fr407041/mnist-siamese-neural-network-for-R-code/blob/master/images/learning_Rate_comparison.png)
 ```
 model %>% compile(
